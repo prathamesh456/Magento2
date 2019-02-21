@@ -1,0 +1,67 @@
+<?php
+
+ $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+ $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+ $current_status = $customerSession->getCustomer()->getStatus(); // prints customer's entity_id
+
+?>
+
+<div>
+    <div> <h2>Welcome ....Your Status : </h2> <label id="LabelID"> <?php echo $current_status; ?>  </label> </div>
+    <select class="status">
+    	<option value="Enabled">Enabled</option>
+        <option value="Disabled">Disabled</option>
+    </select>
+    <button id="save">Save</button>
+</div>
+
+
+
+
+<script type="text/javascript">
+	
+	require(['jquery', 'jquery/ui'], function($){
+			  
+			  jQuery(document).ready( function() {
+			    	var statusurl = "<?php echo $this->getUrl().'downloadable/customer/status'?>";
+			    	var selectedStatusValue,currentStatusValue;
+
+			    	currentStatusValue = '<?php echo $current_status ?>';
+			    	if( currentStatusValue == 'Enabled' )
+			    	{
+			    		jQuery('select option[value="Enabled"]').attr("selected",true);
+			    	}
+			    	else if( currentStatusValue == 'Disabled' )
+			    	{
+			    		jQuery('select option[value="Disabled"]').attr("selected",true);
+			    	}
+			    	console.log(currentStatusValue);
+
+			    	jQuery("#save").on('click',function(){
+
+			    		selectedStatusValue = jQuery("select.status").children("option:selected").val();
+			    		
+			    		jQuery.ajax({
+			    			url: statusurl,
+                			type: 'POST',
+                			dataType: 'json',
+			                data: { statusdata: selectedStatusValue },
+			                complete: function(response) {             
+				                // country = response.responseJSON.default_country;
+				                // state = response.responseJSON.state;
+
+				                jQuery("#LabelID").html(response.responseText);         
+			                },
+			                error: function (xhr, status, errorThrown) {
+			                    console.log('Error happens. Try again.');
+			                }
+			    		});
+
+			    	});
+			  });
+		
+		});
+
+
+</script>
+

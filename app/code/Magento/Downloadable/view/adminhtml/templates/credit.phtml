@@ -1,0 +1,146 @@
+<?php
+
+$blockObj= $block->getLayout()->createBlock('Magento\Downloadable\Block\Adminhtml\Edit\Tab\Credit');
+$current_customerid = $blockObj->getCustomerId();
+$GLOBALS['current_customerid'] = $blockObj->getCustomerId();
+
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // Instance of object manager
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+$tableName = $resource->getTableName('customer_entity'); //gives table name with prefix
+
+//Select Data from table
+$sql = "Select * FROM " . $tableName." where entity_id=".$current_customerid;
+$result = $connection->fetchAll($sql); // gives associated array, table fields as key in array.
+
+//echo "<pre>";
+//print_r($result);
+
+$current_status = $result[0]['status'];
+
+//$update_sql = "Update " . $tableName . " set status='".$current_status."' where entity_id =".$current_customerid;
+
+function updatetest(){
+
+	// $blockObj= $block->getLayout()->createBlock('Magento\Downloadable\Block\Adminhtml\Edit\Tab\Credit');
+	// $current_customerid = $blockObj->getCustomerId();
+    
+    //$current_customerid = 2;
+
+    //echo 'Customer Id '.$current_customerid;
+
+	$status_test='Enabled';
+
+	$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // Instance of object manager
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+$tableName = $resource->getTableName('customer_entity'); //gives table name with prefix
+
+
+    echo "inside updatetest function";
+    $update_sql = "Update " . $tableName . " set status='".$status_test."' where entity_id =".$GLOBALS['current_customerid'];
+    $connection->query($update_sql);
+    echo "end of updatetest function";
+}
+
+function updatetestdisable(){
+
+	// $blockObj= $block->getLayout()->createBlock('Magento\Downloadable\Block\Adminhtml\Edit\Tab\Credit');
+	// $current_customerid = $blockObj->getCustomerId();
+    
+    //$current_customerid = 2;
+
+    //echo 'Customer Id '.$current_customerid;
+
+	$status_test='Disabled';
+
+	$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // Instance of object manager
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+$tableName = $resource->getTableName('customer_entity'); //gives table name with prefix
+
+
+    echo "inside updatetest function";
+    $update_sql = "Update " . $tableName . " set status='".$status_test."' where entity_id =".$GLOBALS['current_customerid'];
+    $connection->query($update_sql);
+    echo "end of updatetest function";
+}
+
+ 
+?>
+
+<h1> Status Info </h1>
+
+<div>
+	<div> <h2>Current Status : </h2> <label id="LabelID"> <?php echo $current_status; ?>  </label> </div><br>
+	<select class="admin_status">
+		<option value="Enabled">Enabled</option>
+		<option value="Disabled">Disabled</option>
+	</select><br>
+	<button id="save_admin">Save Status</button>
+</div>
+
+<script type="text/javascript">
+	
+	require(['jquery', 'jquery/ui'], function($){
+			jQuery(document).ready( function() {
+				
+				var currentStatusValue,selectedStatusValue;
+				var query;
+				var adminurl = "<?php echo $this->getUrl('credit/index/status') ?>";
+				var id,statusdata;
+				currentStatusValue = '<?php echo $current_status ?>';
+				id = '<?php echo $current_customerid ?>';
+
+
+
+				 function update(testval)
+				 {	
+				 	var testparam = testval;
+				 	console.log("testparam" +testparam);
+
+				 	//alert('test update javascript');
+				 	console.log('<?php updatetest(); ?>');
+								
+
+				 }
+
+
+				if( currentStatusValue == 'Enabled' )
+		    	{
+		    		jQuery('select option[value="Enabled"]').attr("selected",true);
+		    	}
+		    	else if( currentStatusValue == 'Disabled' )
+		    	{
+		    		jQuery('select option[value="Disabled"]').attr("selected",true);
+		    	}
+
+				jQuery("#save_admin").on('click',function(){
+
+					selectedStatusValue = jQuery("select.admin_status").children("option:selected").val();
+
+					// console.log(selectedStatusValue);
+					// update(selectedStatusValue);
+						var param = 'ajax=1';
+
+						jQuery.ajax({
+			    			url: adminurl,
+                			type: 'POST',
+                			dataType: 'json',
+			                data: { param , statusdata: selectedStatusValue , iddata : id },
+			                complete: function(response) {             
+				                // country = response.responseJSON.default_country;
+				                // state = response.responseJSON.state;
+				               // console.log('admin response'+response.responseText);
+
+				               jQuery("#LabelID").html(response.responseText); 
+				            },
+			                error: function (xhr, status, errorThrown) {
+			                    console.log('Error happens. Try again.');
+			                }
+			    		});
+				});
+			});
+	});
+</script>
